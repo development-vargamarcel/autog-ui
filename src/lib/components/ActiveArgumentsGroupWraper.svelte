@@ -1,7 +1,7 @@
 <script>
-	import ActiveArgumentsGroup_addFilterAndSortingButton from '$lib/ActiveArgumentsGroup_addFilterAndSortingButton.svelte';
+	import ActiveArgumentsGroup_addFilterAndSortingButton from '$lib/components/ActiveArgumentsGroup_addFilterAndSortingButton.svelte';
 
-	import ActiveArgumentsGroupNormal from '$lib/ActiveArgumentsGroupNormal.svelte';
+	import ActiveArgumentsGroupNormal from '$lib/components/ActiveArgumentsGroupNormal.svelte';
 
 	import { Create_isDragging_Store } from '$lib/stores/isDragging_Store';
 	import ActiveArgument from '$lib/components/ActiveArgument.svelte';

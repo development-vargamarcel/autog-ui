@@ -1,5 +1,5 @@
 <script>
-	import FilterItem from '$lib/FilterItem.svelte';
+	import FilterItem from '$lib/components/FilterItem.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	export let containerEl;

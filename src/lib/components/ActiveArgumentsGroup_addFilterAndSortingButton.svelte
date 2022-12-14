@@ -9,7 +9,7 @@
 	export let prefix = '';
 	// notice - fade in works fine but don't add svelte's fade-out (known issue)
 	import { getContext, setContext } from 'svelte';
-	import Arg from '$lib/Arg.svelte';
+	import Arg from '$lib/components/Arg.svelte';
 	let dragDisabled = true;
 	const hasGroup_argsNode = group.group_argsNode;
 	setContext('isDraggingStore', Create_isDragging_Store());

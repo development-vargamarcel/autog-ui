@@ -1,7 +1,7 @@
 <script>
-	import Input from '$lib/Input.svelte';
-	import Map from '$lib/Map.svelte';
-	import Toggle from '$lib/Toggle.svelte';
+	import Input from '$lib/components/fields/Input.svelte';
+	import Map from '$lib/components/fields/Map.svelte';
+	import Toggle from '$lib/components/fields/Toggle.svelte';
 
 	export let dd_displayType;
 	export let dd_displayStructure;

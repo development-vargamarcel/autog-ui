@@ -3,8 +3,8 @@
 	import { slide } from 'svelte/transition';
 
 	import { getRootType } from '$lib/utils/usefulFunctions';
-	import Arg from '$lib/Arg.svelte';
-	import TypeInfoDisplay from '$lib/TypeInfoDisplay.svelte';
+	import Arg from '$lib/components/Arg.svelte';
+	import TypeInfoDisplay from '$lib/components/TypeInfoDisplay.svelte';
 	import { expoIn, expoOut } from 'svelte/easing';
 	export let template;
 	export let index;
