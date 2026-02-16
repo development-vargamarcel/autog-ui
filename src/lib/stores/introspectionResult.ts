@@ -10,19 +10,19 @@ export const Create_introspectionResult = () => {
         set_schema: (schema) => {
 
         },
-        set_rootTypes: (withDerivedData: false, schema) => {
+        set_rootTypes: (withDerivedData = false, schema) => {
 
         },
-        set_queryFields: (withDerivedData: false, rootTypes) => {
+        set_queryFields: (withDerivedData = false, rootTypes) => {
 
         },
-        set_mutationFields: (withDerivedData: false, rootTypes) => {
+        set_mutationFields: (withDerivedData = false, rootTypes) => {
 
         },
-        set_subscriptionFields: (withDerivedData: false, rootTypes) => {
+        set_subscriptionFields: (withDerivedData = false, rootTypes) => {
 
         },
-        set_fields: (withDerivedData: false, schema) => { //set rootTypes,queryFields,mutationFields,subscriptionFields //fields or types?
+        set_fields: (withDerivedData = false, schema) => { //set rootTypes,queryFields,mutationFields,subscriptionFields //fields or types?
 
         }
 
