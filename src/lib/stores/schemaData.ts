@@ -10,7 +10,7 @@ export const create_schemaData = () => {
         set_schema: (schema) => {
 
         },
-        set_rootTypes: (withDerivedData: false, set_storeVal = true) => {
+        set_rootTypes: (withDerivedData = false, set_storeVal = true) => {
             let storeValue = get(store)
             let { rootTypes, queryFields, mutationFields, schema } = storeValue
             let new_rootTypes = sortByName([...schema.types])
@@ -51,7 +51,7 @@ export const create_schemaData = () => {
         set_rootTypes_DerivedData: () => {
 
         },
-        set_QMSFields: (withDerivedData: false, set_storeVal = true, QMS = ['query', 'mutation', 'subscription']) => {//QMS -> Query,Mutation,Subscription
+        set_QMSFields: (withDerivedData = false, set_storeVal = true, QMS = ['query', 'mutation', 'subscription']) => {//QMS -> Query,Mutation,Subscription
             let storeValue = get(store)
             let { rootTypes, queryFields, mutationFields, schema } = storeValue
             let result = {}
@@ -100,7 +100,7 @@ export const create_schemaData = () => {
             });
             return result
         },
-        set_fields: (withDerivedData: false) => { //set rootTypes,queryFields,mutationFields,subscriptionFields //fields or types?
+        set_fields: (withDerivedData = false) => { //set rootTypes,queryFields,mutationFields,subscriptionFields //fields or types?
             let rootTypes = returnObject.set_rootTypes(true, true)
             let storeValue = get(store)
             let QMSFields = returnObject.set_QMSFields(true, false, ['query', 'mutation', 'subscription'])

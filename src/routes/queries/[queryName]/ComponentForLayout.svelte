@@ -17,7 +17,11 @@
 	const offsetBasedPaginationOptions = getContext('offsetBasedPaginationOptions');
 
 	$: console.log('final_gqlArgObj_Store', $final_gqlArgObj_Store);
-	import { getDataGivenStepsOfFields, getFields_Grouped } from '$lib/utils/usefulFunctions';
+	import {
+		getDataGivenStepsOfFields,
+		getFields_Grouped,
+		getTableCellData
+	} from '$lib/utils/usefulFunctions';
 	import { onDestroy, onMount, getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Type from '$lib/components/Type.svelte';
@@ -25,7 +29,6 @@
 	import { schemaData } from '$lib/stores/schemaData';
 	import OffsetPagination from '$lib/components/pagination/OffsetPagination.svelte';
 	import { paginationTypes } from '$lib/stores/pagination/paginationTypes';
-	import { stringify } from 'postcss';
 
 	//setClient($urqlClient);
 	$: console.log('$QMS_bodyPart_StoreDerived', $QMS_bodyPart_StoreDerived);
@@ -39,24 +42,32 @@
 		goto('/queries');
 	}
 	//
+	/** @type {any[]} */
 	let activeArgumentsData = [];
 	const paginationTypeInfo = paginationTypes.find((pagType) => {
 		return pagType.name == currentQMS_Info.dd_paginationType;
 	});
-	let activeArgumentsDataGrouped_Store_IS_SET = false;
-	$: activeArgumentsDataGrouped_Store_IS_SET =
-		$activeArgumentsDataGrouped_Store.length > 0 ? true : false;
+	// let activeArgumentsDataGrouped_Store_IS_SET = false;
+	// $: activeArgumentsDataGrouped_Store_IS_SET =
+	// 	$activeArgumentsDataGrouped_Store.length > 0 ? true : false;
 	//
 
 	let { scalarFields } = getFields_Grouped(dd_relatedRoot);
 
-	let queryData;
+	/** @type {{fetching: boolean, error: any, data: any}} */
+	let queryData = { fetching: false, error: null, data: null };
+	/** @type {any[]} */
 	let rows = [];
+	/** @type {any[]} */
 	let rowsCurrent = [];
+	/** @type {() => void} */
 	let loadedF;
+	/** @type {() => void} */
 	let completeF;
 	let infiniteId = 0;
 	const paginationState = getContext(`paginationState`);
+
+	/** @param {{ detail: { loaded: () => void, complete: () => void } }} event */
 	function infiniteHandler({ detail: { loaded, complete } }) {
 		loadedF = loaded;
 		completeF = complete;
@@ -64,15 +75,18 @@
 			paginationState.nextPage(queryData?.data, queryName, 'query');
 		}
 	}
+
+	/** @param {string} queryBody */
 	const runQuery = (queryBody) => {
 		console.log('queryBody', queryBody);
 		let fetching = true;
 		let error = false;
 		let data = false;
-		$urqlCoreClient
-			.query(queryBody)
+		// @ts-ignore
+		/** @type {any} */ ($urqlCoreClient)
+			?.query(queryBody)
 			.toPromise()
-			.then((result) => {
+			.then((/** @type {any} */ result) => {
 				fetching = false;
 
 				if (result.error) {
@@ -82,11 +96,13 @@
 					data = result.data;
 				}
 				queryData = { fetching, error, data };
+				// @ts-ignore
 				rowsCurrent = getDataGivenStepsOfFields(undefined, queryData.data[queryName], [
 					currentQMS_Info.dd_displayName,
-					...$endpointInfo.rowsLocationPossibilities.find((rowsLocation) => {
+					// @ts-ignore
+					...($endpointInfo?.rowsLocationPossibilities.find((/** @type {any} */ rowsLocation) => {
 						return rowsLocation.checker(currentQMS_Info);
-					}).rowsLocation
+					}).rowsLocation || [])
 				]);
 
 				if (rowsCurrent?.length == undefined) {
@@ -112,11 +128,11 @@
 					rows = rowsCurrent;
 				}
 				if (
-					paginationTypeInfo?.get_rowLimitingArgNames(currentQMS_Info.dd_paginationArgs).length >
+					(paginationTypeInfo?.get_rowLimitingArgNames(currentQMS_Info.dd_paginationArgs)?.length || 0) >
 						0 &&
 					paginationTypeInfo
 						?.get_rowLimitingArgNames(currentQMS_Info.dd_paginationArgs)
-						.some((argName) => {
+						?.some((argName) => {
 							return rowsCurrent?.length == $paginationState?.[argName];
 						})
 				) {
@@ -131,7 +147,7 @@
 				rowsCurrent = [];
 			});
 	};
-	QMS_bodyPart_StoreDerived.subscribe((QMS_body) => {
+	QMS_bodyPart_StoreDerived.subscribe((/** @type {string} */ QMS_body) => {
 		if (QMS_body && QMS_body !== '') {
 			runQuery(
 				`query {
@@ -148,14 +164,16 @@
 		queryData = { fetching: true, error: false, data: false };
 	}
 
+	/** @param {{ detail: { column: any } }} e */
 	const hideColumn = (e) => {
 		tableColsData_Store.removeColumn(e.detail.column);
 	};
-	tableColsData_Store.subscribe((data) => {
+	tableColsData_Store.subscribe((/** @type {any} */ data) => {
 		console.log(data);
 	});
 
 	let column_stepsOfFields = '';
+	/** @param {{ key: string }} e */
 	const addColumnFromInput = (e) => {
 		if (e.key == 'Enter') {
 			let stepsOfFields = column_stepsOfFields.replace(/\s/g, '').replace(/\./g, '>').split('>');
@@ -181,6 +199,31 @@
 		hljs.registerLanguage('graphql', graphql);
 		hljs.highlightAll();
 	});
+
+	const downloadCSV = () => {
+		const cols = $tableColsData_Store.filter((/** @type {any} */ c) => !c.hidden);
+		const headers = cols.map((/** @type {any} */ c) => c.title).join(',');
+		const csvRows = rows.map((row, index) => {
+			return cols
+				.map((/** @type {any} */ col) => {
+					const cellData = getTableCellData(row, col, index);
+					const stringData = JSON.stringify(cellData);
+					if (stringData === undefined) return '';
+					return stringData.includes(',') ? `"${stringData.replace(/"/g, '""')}"` : stringData;
+				})
+				.join(',');
+		});
+		const csvString = [headers, ...csvRows].join('\n');
+		const blob = new Blob([csvString], { type: 'text/csv' });
+		const url = window.URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.setAttribute('hidden', '');
+		a.setAttribute('href', url);
+		a.setAttribute('download', `${queryName}.csv`);
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+	};
 </script>
 
 <!-- <button
@@ -235,11 +278,7 @@
 		</div>
 	</div>
 	<div class="grow">
-		<ActiveArguments
-			argsInfo={currentQMS_Info?.args}
-			{activeArgumentsData}
-			on:argsChanged={(e) => {}}
-		/>
+		<ActiveArguments argsInfo={currentQMS_Info?.args} on:argsChanged={(e) => {}} />
 	</div>
 	<button
 		class=" btn btn-xs grow normal-case "
@@ -247,6 +286,7 @@
 			showQMSBody = !showQMSBody;
 		}}>QMS body</button
 	>
+	<button class=" btn btn-xs grow normal-case " on:click={downloadCSV}>Export CSV</button>
 </div>
 
 <slot />
